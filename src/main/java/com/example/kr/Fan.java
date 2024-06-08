@@ -1,18 +1,22 @@
 package com.example.kr;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 
-public class Fan implements Cloneable, Comparable<Fan> {
+public class Fan implements Cloneable, Comparable<Fan>, Serializable {
 
     static {
         System.out.println("Static initializer 'Fan'");
     }
-
     private String name;
     private int age;
     private double money;
@@ -23,13 +27,20 @@ public class Fan implements Cloneable, Comparable<Fan> {
     private int width;
     private int height;
     private boolean isActive = false;
-    private boolean isFootballer;
-    private boolean isReferee;
     private int[] stamina = new int[2];
-    private ImageView imageView;
-    private ImageView imageIcon;
+    private transient ImageView imageView;
+    private transient ImageView imageIcon;
     private Map<Integer, String> accessories = new HashMap<>();
     public static Scanner in = new Scanner(System.in);
+    private final int uniqueID;
+
+    public int getUniqueID() {
+        return uniqueID;
+    }
+
+    public int createID() {
+        return (int) System.currentTimeMillis() / 432;
+    }
 
     //МЕТОДИ
     public void buyTicket() {
@@ -47,6 +58,19 @@ public class Fan implements Cloneable, Comparable<Fan> {
     }
 
     public void walk() {
+//            float xChange = (random.nextFloat() - 0.5f) * 20; // Change in x position
+//            float yChange = (random.nextFloat() - 0.5f) * 20; // Change in y position
+//
+//            // Update positions
+//            this.xPos += xChange;
+//            this.yPos += yChange;
+//
+//            // Optionally, add boundary checks (assuming canvas width and height are 800x600)
+//            if (this.xPos < 0) this.xPos = 0;
+//            if (this.xPos > 800) this.xPos = 800;
+//            if (this.yPos < 0) this.yPos = 0;
+//            if (this.yPos > 600) this.yPos = 600;
+
         System.out.println("I'm walking");
     }
 
@@ -68,9 +92,8 @@ public class Fan implements Cloneable, Comparable<Fan> {
         System.out.println(this + " interacts with " + fan);
     }
 
-    public void interact(Location location) {
-        System.out.println(this + " interacts with " + location);
-        location.interact(this); // Виклик методу взаємодії в Location
+    public void interact(Fan fan1, Fan fan2) {
+        System.out.println(this + " interacts with " + fan1 + " and " + fan2);
     } // Статичний поліморфізм (Compile-time Polymorphism)
 
     public void setAccessory(Integer number, String accessory) {
@@ -87,6 +110,7 @@ public class Fan implements Cloneable, Comparable<Fan> {
         this.yPos = yPos;
         stamina[0] = 10;
         stamina[1] = 10;
+        this.uniqueID = createID();
         System.out.println("Constructor Fan(String name, double money, boolean hasTicket, float xPos, float yPos) was called. An object was created with parameters: " + toString());
         System.out.println();
     }
@@ -190,21 +214,6 @@ public class Fan implements Cloneable, Comparable<Fan> {
         return isActive;
     }
 
-    public boolean isFootballer() {
-        return isFootballer;
-    }
-
-    public void setFootballer(boolean footballer) {
-        isFootballer = footballer;
-    }
-
-    public boolean isReferee() {
-        return isReferee;
-    }
-
-    public void setReferee(boolean referee) {
-        isReferee = referee;
-    }
 
     protected ImageView getImageIcon() {
         return imageIcon;
@@ -247,6 +256,13 @@ public class Fan implements Cloneable, Comparable<Fan> {
 
         tmp.accessories = new HashMap<>();
         tmp.accessories.putAll(this.accessories);
+        tmp.setMoney(this.getMoney());
+        tmp.setXPos(this.xPos+90);
+        tmp.setYPos(this.yPos);
+        tmp.setName(this.name);
+        tmp.setAge(this.age);
+        tmp.setHasTicket(this.hasTicket);
+        tmp.setBlueTeam(this.isBlueTeam);
 
         return tmp;
     }
@@ -273,13 +289,13 @@ public class Fan implements Cloneable, Comparable<Fan> {
 
     @Override
     public int compareTo(Fan o) {
-        return Double.compare(this.getMoney(), o.getMoney());
+        return Double.compare(this.getStamina()[1], o.getStamina()[1]);
     }
 
     public static class FanComparator implements Comparator<Fan> {
         @Override
         public int compare(Fan o1, Fan o2) {
-            return Double.compare(o1.getMoney(), o2.getMoney());
+            return Double.compare(o1.getStamina()[0], o2.getStamina()[0]);
         }
     }
 
@@ -332,4 +348,33 @@ public class Fan implements Cloneable, Comparable<Fan> {
     public void setStamina(int[] stamina) {
         this.stamina = stamina;
     }
+
+//    @Serial
+//    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+//        out.defaultWriteObject();
+//        out.writeObject(currentPNG.getUrl());
+//        out.writeObject(currentImageGIF.getImage().getUrl());
+//    }
+//
+//    @Serial
+//    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+//        in.defaultReadObject();
+//        String currentPNG_URL = (String) in.readObject();
+//        String currentGIF_URL = (String) in.readObject();
+//        try {
+//            if (currentPNG_URL != null && currentGIF_URL != null) {
+//                this.currentPNG = new Image(currentPNG_URL);
+//                Image currentGIF = new Image(currentGIF_URL);
+//                this.currentImagePNG = new ImageView(currentPNG);
+//                this.currentImageGIF = new ImageView(currentGIF);
+//            }
+//        } catch (IllegalArgumentException ignored) {}
+//    }
+//
+//
+//    @Serial
+//    private void readObjectNoData() throws ObjectStreamException {
+//        throw new ObjectStreamException("No data available to deserialize") {
+//        };
+//    }
 }

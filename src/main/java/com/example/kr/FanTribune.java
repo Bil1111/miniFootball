@@ -21,7 +21,7 @@ public class FanTribune extends Location {
         if (imageView == null) {
             loadImage();
         }
-        gc.fillOval(x - radius + 70, y - radius + 130, radius * 2, radius * 2);
+        gc.fillOval(x - radius + 190, y - radius + 420, radius * 7, radius * 7);
         gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 30);
         gc.fillText("Owners: " + microObjectsNames.toString(), x - radius + 20, y - radius + 10);
         gc.drawImage(imageView.getImage(), x - radius + 20, y - radius + 30);
@@ -42,7 +42,7 @@ public class FanTribune extends Location {
     }
 
     @Override
-    public void interact(Fan fan) {
+    public Fan interact(Fan fan) {
         if (fan instanceof Referee) {
             Referee referee = (Referee) fan;
             referee.recovery();
@@ -52,5 +52,6 @@ public class FanTribune extends Location {
         } else if (fan instanceof Fan) {
             fan.cheer();
         }
+        return fan;
     }
 }

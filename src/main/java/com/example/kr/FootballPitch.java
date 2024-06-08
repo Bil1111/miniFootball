@@ -59,7 +59,7 @@ public class FootballPitch extends Location {
 
 
         gc.setFill(Color.BLACK);
-        gc.fillOval(x - radius + 70, y - radius + 110, radius * 2, radius * 2);
+        gc.fillOval(x - radius + 190, y - radius + 320, radius * 7, radius * 7);
         gc.setFont(new Font("Arial", 10));
         gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 40);
         gc.fillText("Owners: " + microObjectsNames, x - radius + 20, y - radius + 20);
@@ -91,7 +91,7 @@ public class FootballPitch extends Location {
 
 */
     @Override
-    public void interact(Fan fan) {
+    public Fan interact(Fan fan) {
         if (fan instanceof Referee) {
             Referee referee = (Referee) fan;
             referee.removeFromField(new Fan());
@@ -101,7 +101,8 @@ public class FootballPitch extends Location {
             footballer.play();
             footballer.setMoney(footballer.getMoney()+5000);
         } else if (fan instanceof Fan) {
-            System.out.println("You must first be a footballer!");
+            //System.out.println("You must first be a footballer!");
         }
+        return fan;
     }
 }

@@ -5,10 +5,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class Location {
+public class Location implements Serializable {
     protected String name;
     protected ArrayList<Fan> microObjects;
     protected ArrayList<String> microObjectsNames;
@@ -16,7 +20,7 @@ public class Location {
     protected int width;
     protected float xPos;
     protected float yPos;
-    protected ImageView imageView;
+    protected transient ImageView imageView;
 
     final public static double WIDTH = Main.mainAnchorPane.getPrefWidth();
     final public static double HEIGHT = Main.mainAnchorPane.getPrefHeight();
@@ -43,6 +47,20 @@ public class Location {
 
     public void setImageView(ImageView imageView) {
         this.imageView = imageView;
+    }
+
+    public ArrayList<Fan> getMicroObjects() {
+        return microObjects;
+    }
+
+    public void setMicroObjects(ArrayList<Fan> microObjects) {
+        this.microObjects = microObjects;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        loadImage();
     }
 
     public Location(String name, float x, float y) {
@@ -91,7 +109,8 @@ public class Location {
         this.width = width;
     }
 
-    public void interact(Fan fan) {
+    public Fan interact(Fan fan) {
+        return fan;
     }
     public void draw(GraphicsContext gc) {
         float x = this.xPos;

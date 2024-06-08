@@ -22,7 +22,7 @@ public class FootballRefereeSchool extends Location {
         if (imageView == null) {
             loadImage();
         }
-        gc.fillOval(x - radius + 70, y - radius + 140, radius * 2, radius * 2);
+        gc.fillOval(x - radius + 190, y - radius + 400, radius * 7, radius * 7);
         gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 30);
         gc.fillText("Owners: " + microObjectsNames.toString(), x - radius + 20, y - radius + 10);
         gc.drawImage(imageView.getImage(), x - radius + 20, y - radius + 30);
@@ -43,47 +43,31 @@ public class FootballRefereeSchool extends Location {
     }
 
     @Override
-    public void interact(Fan fan) {
-        if (fan instanceof Referee || (fan instanceof Fan && fan.isReferee())) {
-            Referee referee;
-//            if (fan instanceof Referee) {
-//                referee = (Referee) fan;
-//            } else {
-                referee = new Referee();
-                referee.setMoney(fan.getMoney());
-                referee.setStamina(new int[]{10, 5});
-                referee.setImageView(fan.getImageView());
-                referee.setXPos(fan.getXPos());
-                referee.setYPos(fan.getYPos());
+    public Fan interact(Fan fan) {
+        if (fan instanceof Referee) {
+            System.out.println("You are a referee");
+            return fan;
+
+        } else if (fan instanceof Footballer) {
+            if (fan.getMoney() >= 5000) {
+                Referee referee = new Referee();
                 referee.setName(fan.getName());
                 referee.setHasTicket(fan.isHasTicket());
                 referee.setBlueTeam(fan.isBlueTeam());
                 referee.setAge(fan.getAge());
-            //}
-        } else if (fan instanceof Footballer) {
-            Referee referee = new Referee();
-            referee.setName(fan.getName());
-            referee.setHasTicket(fan.isHasTicket());
-            referee.setBlueTeam(fan.isBlueTeam());
-            referee.setAge(fan.getAge());
-            referee.setMoney(fan.getMoney() - 3000);
-            referee.setStamina(new int[]{10, 5});
-            referee.setXPos(fan.getXPos());
-            referee.setYPos(fan.getYPos());
-            referee.setImageView(new ImageView(Objects.requireNonNull(getClass().getResource("/com/example/kr/Referee.png")).toExternalForm()));
+                referee.setMoney(fan.getMoney() - 5000);
+                referee.setStamina(new int[]{10, 5});
+                referee.setXPos(fan.getXPos());
+                referee.setYPos(fan.getYPos());
+                referee.setImageView(new ImageView(Objects.requireNonNull(getClass().getResource("/com/example/kr/Referee.png")).toExternalForm()));
 
-
-            fan.setReferee(true);
-            fan.setName(referee.getName());
-            fan.setMoney(referee.getMoney());
-            fan.setHasTicket(referee.isHasTicket());
-            fan.setAge(referee.getAge());
-            fan.setXPos(referee.getXPos());
-            fan.setYPos(referee.getYPos());
-            fan.setStamina(referee.getStamina());
-            fan.setImageView(referee.getImageView());
+                return referee;
+            }
+            return fan;
         } else if (fan instanceof Fan) {
             System.out.println("You must be a footballer first!!!");
+            return fan;
         }
+        return fan;
     }
 }

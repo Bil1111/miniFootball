@@ -21,9 +21,9 @@ public class CashRegister extends Location{
         if(imageView == null) {
             loadImage();
         }
-        gc.fillOval(x - radius + 70, y - radius + 140, radius * 2, radius * 2);
-        gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 30);
-        gc.fillText("Owners: " + microObjectsNames.toString(), x - radius + 20, y - radius + 10);
+        gc.fillOval(x - radius + 190, y - radius + 420, radius * 7, radius * 7);
+        gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 20);
+        gc.fillText("Owners: " + microObjectsNames.toString(), x - radius + 20, y - radius );
         gc.drawImage(imageView.getImage(), x - radius + 20, y - radius + 30);
     }
 
@@ -42,7 +42,7 @@ public class CashRegister extends Location{
     }
 
     @Override
-    public void interact(Fan fan) {
+    public Fan interact(Fan fan) {
         if (fan instanceof Referee) {
             Referee referee = (Referee) fan;
             referee.setMoney(referee.getMoney()+10);
@@ -52,5 +52,6 @@ public class CashRegister extends Location{
         } else if (fan instanceof Fan) {
             fan.setMoney(fan.getMoney()+50);
         }
+        return fan;
     }
 }

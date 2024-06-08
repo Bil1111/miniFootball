@@ -5,25 +5,23 @@ import java.util.ArrayList;
 
 public class MacroObjectManager {
     private static MacroObjectManager instance;
-    private final ArrayList<Location> macroObjects;
+    private static final ArrayList<Location> macroObjects = new ArrayList<>();
 
-    public ArrayList<Location> getMacroObjects() {
+    public static ArrayList<Location> getMacroObjects() {
         return macroObjects;
     }
     private MacroObjectManager() {
-        macroObjects = new ArrayList<>();
-//      фффLocation location=new Location("",100,100);
-        FootballPitch footballPitch = new FootballPitch("FootballPitch", 450, 300);
+        FootballPitch footballPitch = new FootballPitch("FootballPitch", 1350, 700);
         addMacroObject(footballPitch);
-        BlueTeamTrainingBase blueTeamTrainingBase = new BlueTeamTrainingBase("BlueTeamTrainingBase", 700, 300);
+        BlueTeamTrainingBase blueTeamTrainingBase = new BlueTeamTrainingBase("BlueTeamTrainingBase", 2300, 900);
         addMacroObject(blueTeamTrainingBase);
-        RedTeamTrainingBase redTeamTrainingBase = new RedTeamTrainingBase("RedTeamTrainingBase", 150, 300);
+        RedTeamTrainingBase redTeamTrainingBase = new RedTeamTrainingBase("RedTeamTrainingBase", 150, 900);
         addMacroObject(redTeamTrainingBase);
-        FootballRefereeSchool footballRefereeSchool = new FootballRefereeSchool("FootballRefereeSchool", 450, 600);
+        FootballRefereeSchool footballRefereeSchool = new FootballRefereeSchool("FootballRefereeSchool", 1350, 1700);
         addMacroObject(footballRefereeSchool);
-        CashRegister cashRegister = new CashRegister("CashRegister", 150, 50);
+        CashRegister cashRegister = new CashRegister("CashRegister", 450, 130);
         addMacroObject(cashRegister);
-        FanTribune fanTribune = new FanTribune("FanTribune", 450, 30);
+        FanTribune fanTribune = new FanTribune("FanTribune", 1850, 130);
         addMacroObject(fanTribune);
     }
 
