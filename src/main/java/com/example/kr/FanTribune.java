@@ -23,7 +23,7 @@ public class FanTribune extends Location {
         }
         gc.fillOval(x - radius + 190, y - radius + 420, radius * 7, radius * 7);
         gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 30);
-        gc.fillText("Owners: " + microObjectsNames.toString(), x - radius + 20, y - radius + 10);
+        gc.fillText("Owners: " + counter, x - radius + 20, y - radius + 10);
         gc.drawImage(imageView.getImage(), x - radius + 20, y - radius + 30);
     }
 
@@ -43,6 +43,7 @@ public class FanTribune extends Location {
 
     @Override
     public Fan interact(Fan fan) {
+        contains(5);
         if (fan instanceof Referee) {
             Referee referee = (Referee) fan;
             referee.recovery();

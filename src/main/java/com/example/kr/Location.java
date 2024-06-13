@@ -10,20 +10,19 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Location implements Serializable {
     protected String name;
-    protected ArrayList<Fan> microObjects;
-    protected ArrayList<String> microObjectsNames;
+    protected int counter=0;
+    protected static ArrayList<Fan> microObjects = new ArrayList<>();
+    private Set<Integer> countedFans = new HashSet<>();
+    protected List<String> microObjectsNames = new ArrayList<>();
     protected int height;
     protected int width;
     protected float xPos;
     protected float yPos;
     protected transient ImageView imageView;
-
-    final public static double WIDTH = Main.mainAnchorPane.getPrefWidth();
-    final public static double HEIGHT = Main.mainAnchorPane.getPrefHeight();
 
     public float getxPos() {
         return xPos;
@@ -49,13 +48,6 @@ public class Location implements Serializable {
         this.imageView = imageView;
     }
 
-    public ArrayList<Fan> getMicroObjects() {
-        return microObjects;
-    }
-
-    public void setMicroObjects(ArrayList<Fan> microObjects) {
-        this.microObjects = microObjects;
-    }
 
     @Serial
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -63,6 +55,44 @@ public class Location implements Serializable {
         loadImage();
     }
 
+    public void contains(int index){
+        for(Fan fan: MicroObjectManager.getInstance().getFans()){
+            if(((fan.getXPos() >= MacroObjectManager.getMacroObjects().get(index).getxPos() && fan.getXPos() <= MacroObjectManager.getMacroObjects().get(index).getxPos() + MacroObjectManager.getMacroObjects().get(index).getWidth() ||
+                    fan.getXPos() + fan.getWidth() >= MacroObjectManager.getMacroObjects().get(index).getxPos() && fan.getXPos() <= MacroObjectManager.getMacroObjects().get(index).getxPos() + MacroObjectManager.getMacroObjects().get(index).getWidth()) &&
+                    (fan.getYPos() >= MacroObjectManager.getMacroObjects().get(index).getyPos() && fan.getYPos() <= MacroObjectManager.getMacroObjects().get(index).getyPos() + MacroObjectManager.getMacroObjects().get(index).getHeight() ||
+                            fan.getYPos() + fan.getHeight() >= MacroObjectManager.getMacroObjects().get(index).getyPos() && fan.getYPos() <= MacroObjectManager.getMacroObjects().get(index).getyPos() + MacroObjectManager.getMacroObjects().get(index).getHeight()))){
+                if (!countedFans.contains(fan.getUniqueID())) {
+                    countedFans.add(fan.getUniqueID());
+                    counter++;
+                }
+            }
+        }
+    }
+
+    protected void addNewMicroObject(Object object) {
+        if (object instanceof Fan) {
+            if (microObjects.stream().anyMatch(fan -> fan.getUniqueID() == ((Fan) object).getUniqueID())) {
+
+                return;
+            }
+           // counter++;
+            microObjectsNames.add(((Fan) object).getName());
+            microObjects.add((Fan) object);
+        }
+    }
+
+    protected void removeNewMicroObject(Object object) {
+        if (object instanceof Fan) {
+            if(microObjects.contains((Fan)object)) {
+                microObjects.remove(object);
+             //   counter--;
+            }
+            int indexToRemove = microObjectsNames.indexOf(((Fan) object).getName());
+            if (indexToRemove != -1) {
+                microObjectsNames.remove(indexToRemove);
+            }
+        }
+    }
     public Location(String name, float x, float y) {
         this.name = name;
         this.xPos = x;
@@ -71,19 +101,6 @@ public class Location implements Serializable {
         microObjectsNames = new ArrayList<>();
     }
 
-    public void addFan(Fan fan) {
-        microObjects.add(fan);
-        microObjectsNames.add(fan.getName());
-    }
-
-    public void removeFan(Fan fan) {
-        microObjects.remove(fan);
-        microObjectsNames.remove(fan.getName());
-    }
-
-    public void update(){
-
-    }
 
     public String getName() {
         return name;
@@ -121,7 +138,7 @@ public class Location implements Serializable {
         gc.fillOval(x - radius + 70, y - radius + 110, radius * 2, radius * 2);
         gc.setFont(new Font("Arial", 10));
         gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 20);
-        gc.fillText("Owners: " + microObjectsNames, x - radius + 20, y - radius + 10);
+        gc.fillText("Owners: " + counter, x - radius + 20, y - radius + 10);
 
         if (imageView == null) {
             loadImage();
@@ -131,7 +148,7 @@ public class Location implements Serializable {
 
     public void loadImage() {
         if (this.imageView == null) {
-            URL imageURL = getClass().getResource("/com/example/kr/MiniMapBorder1.png");
+            URL imageURL = getClass().getResource("");
             if (imageURL != null) {
                 this.imageView = new ImageView(imageURL.toExternalForm());
                 setHeight((int) imageView.getImage().getHeight());

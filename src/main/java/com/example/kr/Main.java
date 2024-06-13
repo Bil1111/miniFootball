@@ -4,18 +4,20 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -33,6 +35,7 @@ public class Main extends Application {
     public final static int FPS = 120;
     private double initialOffsetX;
     private double initialOffsetY;
+    private static boolean HOLD = false;
     public static Scene mainScene;
     public static AnchorPane mainAnchorPane;
     public static ScrollPane mainScrollPane;
@@ -92,8 +95,11 @@ public class Main extends Application {
                     microObjectManager.requests();//запити
                     break;
                 case X:
-                    microObjectManager.method();//взаємодія мікро з макро
+                    microObjectManager.interactionBetweenMicroAndMacro();//взаємодія мікро з макро
                     break;
+//                case V:
+//                    microObjectManager.changeMovement();
+//                    break;
                 case C:
                     List<Fan> fansToAdd = new ArrayList<>();
                     for (Fan fan : MicroObjectManager.getInstance().getFans()) {
@@ -164,6 +170,26 @@ public class Main extends Application {
             }
         });
 
+        addPressAndHoldHandler(mainAnchorPane, event -> {
+            double xPos = event.getX();
+            double yPos = event.getY();
+            Fan fan = MicroObjectManager.getInstance().getFanHoldingPos((int) xPos, (int) yPos);
+
+            if (fan != null) {
+                if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+                    initialOffsetX = xPos - fan.getXPos();
+                    initialOffsetY = yPos - fan.getYPos();
+                    HOLD = true;
+                } else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED && HOLD) {
+                    double newX = xPos - initialOffsetX;
+                    double newY = yPos - initialOffsetY;
+                    MicroObjectManager.getInstance().moveSimpleFan((int) newX, (int) newY, fan);
+                } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+                    HOLD = false;
+                }
+            }
+        });
+
         miniMap.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
                 double xRatio = event.getX() / miniMap.getWidth();
@@ -208,4 +234,22 @@ public class Main extends Application {
         miniMapGc.setStroke(Color.RED);
         miniMapGc.strokeRect(viewportX, viewportY, viewportWidth, viewportHeight);
     }
+    private void addPressAndHoldHandler(Node node, EventHandler<MouseEvent> handler) {
+        class Wrapper<T> { T content; }
+        Wrapper<MouseEvent> eventWrapper = new Wrapper<>();
+
+        node.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            eventWrapper.content = event;
+            handler.handle(event);
+        });
+        node.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
+            eventWrapper.content = event;
+            handler.handle(event);
+        });
+        node.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
+            eventWrapper.content = event;
+            handler.handle(event);
+        });
+    }
+
 }

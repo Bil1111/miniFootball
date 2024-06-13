@@ -8,30 +8,54 @@ import javafx.scene.text.Font;
 import java.util.Objects;
 
 public class Referee extends Footballer {
+    private boolean previousFootballRefereeSchool;
+
+    public boolean isPreviousFootballRefereeSchool() {
+        return previousFootballRefereeSchool;
+    }
+
+    public void setPreviousFootballRefereeSchool(boolean previousFootballRefereeSchool) {
+        this.previousFootballRefereeSchool = previousFootballRefereeSchool;
+    }
+
     Referee(String name, double money, boolean hasTicket, boolean isBlueTeam, float xPos, float yPos) {
         super(name, money, hasTicket, isBlueTeam, xPos, yPos);
     }
 
     public Referee() {
         this("Ivan", 50, false, false, 100, 100);//null or ""
-        System.out.println("Constructor Fan() was called. An object was created with parameters: " + toString());
-        System.out.println();
+        //System.out.println("Constructor Fan() was called. An object was created with parameters: " + toString());
     }
-    public void removeFromField(Fan fan) {
-        System.out.println("Yellow card");
+
+    public void work() {
+        if (this.getStamina()[0] > 0) {
+            this.setStamina(new int[]{this.getStamina()[0] - 1, this.getStamina()[1]});
+            this.setMoney(this.getMoney() + 1000);
+        }
     }
 
     @Override
     public void recovery() {
         if (this.getStamina()[0] < 10) {
             this.setStamina(new int[]{this.getStamina()[0] + 2, 5});
+            if(this.getStamina()[0] > 10){
+                this.setStamina(new int[]{10, 5});
+            }
+        }
+    }
+
+    @Override
+    public void train() {
+        if (this.getStamina()[0] < 10) {
+            this.setMoney(this.getMoney() - 500);
+            this.setStamina(new int[]{10, 5});
         }
     }
 
     //Динамічний поліморфізм (Run-time Polymorphism)
     @Override
     public void earnMoney() {
-        System.out.println("Go to football field to earn money!");
+        this.setMoney(this.getMoney()+10);
     }
 
     @Override
@@ -74,5 +98,134 @@ public class Referee extends Footballer {
         }
     }
 
+    @Override
+    public void walk(Location object) {
+        checkCollision(object);
+        if (!isActive()) {
+            if (isComplete()) {
+                if (getRandomGoalX() == -1 && getRandomGoalY() == -1) {
+                    setRandomGoalX(getRandom().nextInt(100, 1200));
+                    setRandomGoalY(getRandom().nextInt(100, 1200));
+                } else {
+                    if (Math.abs(getXPos() - getRandomGoalX()) < 30 && Math.abs(getYPos() - getRandomGoalY()) < 30) {
+                        setRandomGoalX(-1);
+                        setRandomGoalY(-1);
+                        setComplete(false);
+                        setHolding(false);
+                    } else {
+                        moveTo(getRandomGoalX(), getRandomGoalY());
+                    }
+                }
+            } else {
+                if (!isHolding()) {
+                    if (!isPreviousFootballPitch() && isPreviousFanTribune() && this.isBlueTeam()) {
+                        moveTo(MacroObjectManager.X_POS_BLUE_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_BLUE_TEAM_TRAINING_BASE);
+                    } else if (!isPreviousFootballPitch() && isPreviousFanTribune() && !this.isBlueTeam()) {
+                        moveTo(MacroObjectManager.X_POS_RED_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_RED_TEAM_TRAINING_BASE);
+                    } else if (isPreviousBlueTeamTrainingBase()||isPreviousRedTeamTrainingBase()) {
+                        moveTo(MacroObjectManager.X_POS_FOOTBALL_PITCH, MacroObjectManager.Y_POS_FOOTBALL_PITCH);
+                    }
+                    else if (isPreviousFootballPitch()) {
+                        moveTo(MacroObjectManager.X_POS_FAN_TRIBUNE, MacroObjectManager.Y_POS_FAN_TRIBUNE);
+                    }
+                }
+            }
+        }
+    }
 
+    @Override
+    protected void checkCollision(Location location) {
+        if (((getXPos() >= location.xPos && getXPos() <= location.xPos + location.getWidth() ||
+                getXPos() + getWidth() >= location.xPos && getXPos() <= location.xPos + location.getWidth()) &&
+                (getYPos() >= location.yPos && getYPos() <= location.yPos + location.getHeight() ||
+                        getYPos() + getHeight() >= location.yPos && getYPos() <= location.yPos + location.getHeight()))) {
+
+            if (getHandler() != null) {
+                //getHandler().addNewMicroObject(this);
+            }
+            setHandler(location);
+
+            if (getTickExisted() != 200) {
+                setTickExisted(getTickExisted() + 1);
+            } else {
+                setComplete(true);
+                setTickExisted(0);
+            }
+
+            if (this instanceof Referee) {
+                switch (location) {
+                    case FootballPitch footballPitch -> {
+                        if (isPreviousBlueTeamTrainingBase()) {
+                            setTickExisted(0);
+                            setComplete(false);
+                            setHolding(true);
+                           // location.addNewMicroObject(this);
+                            location.interact(this);
+                            setPreviousBlueTeamTrainingBase(false);
+                            setPreviousRedTeamTrainingBase(false);
+                            setPreviousFootballPitch(true);
+                            setPreviousFanTribune(false);
+                        }
+                        if (isPreviousRedTeamTrainingBase()) {
+                            setTickExisted(0);
+                            setComplete(false);
+                            setHolding(true);
+                          //  location.addNewMicroObject(this);
+                            location.interact(this);
+                            setPreviousBlueTeamTrainingBase(false);
+                            setPreviousRedTeamTrainingBase(false);
+                            setPreviousFootballPitch(true);
+                            setPreviousFanTribune(false);
+                        }
+                    }
+                    case BlueTeamTrainingBase blueTeamTrainingBase -> {
+                        if (isPreviousFanTribune()) {
+                            setTickExisted(0);
+                            setComplete(false);
+                            setHolding(true);
+                        }
+                       // location.addNewMicroObject(this);
+                        location.interact(this);
+                        setPreviousBlueTeamTrainingBase(true);
+                        setPreviousRedTeamTrainingBase(false);
+                        setPreviousFootballPitch(false);
+                        setPreviousFanTribune(false);
+                    }
+                    case RedTeamTrainingBase redTeamTrainingBase -> {
+                        if (isPreviousFanTribune()) {
+                            setTickExisted(0);
+                            setComplete(false);
+                            setHolding(true);
+                        }
+                       // location.addNewMicroObject(this);
+                        location.interact(this);
+                        setPreviousBlueTeamTrainingBase(false);
+                        setPreviousRedTeamTrainingBase(true);
+                        setPreviousFootballPitch(false);
+                        setPreviousFanTribune(false);
+                    }
+                    case FanTribune fanTribune -> {
+                        if (isPreviousFootballPitch()) {
+                            setTickExisted(0);
+                            setComplete(false);
+                            setHolding(true);
+                        }
+                       // location.addNewMicroObject(this);
+                        location.interact(this);
+                        setPreviousBlueTeamTrainingBase(false);
+                        setPreviousRedTeamTrainingBase(false);
+                        setPreviousFootballPitch(false);
+                        setPreviousFanTribune(true);
+                    }
+                    default -> {
+                    }
+                }
+            }
+        } else {
+            if (getHandler() != null) {
+               // getHandler().removeNewMicroObject(this);
+                setHandler(null);
+            }
+        }
+    }
 }

@@ -24,7 +24,7 @@ public class RedTeamTrainingBase extends Location{
         }
         gc.fillOval(x - radius + 210, y - radius + 360, radius * 7, radius * 7);
         gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 30);
-        gc.fillText("Owners: " + microObjectsNames.toString(), x - radius + 20, y - radius + 10);
+        gc.fillText("Owners: " + counter, x - radius + 20, y - radius + 10);
         gc.drawImage(imageView.getImage(), x - radius + 20, y - radius + 30);
     }
 
@@ -41,26 +41,22 @@ public class RedTeamTrainingBase extends Location{
             }
         }
     }
-    /*
-витрачають гроші і відновлюються швидше, ніж на трибунах
-розділення по командах
-фанати за певну суму стають гравцями
-*/
     @Override
     public Fan interact(Fan fan) {
+        contains(2);
         if (fan instanceof Referee) {
             Referee referee = (Referee) fan;
-            if (referee.getStamina()[0] < 10) {
-                referee.setMoney(referee.getMoney() - 500);
-                referee.setStamina(new int[]{10, 5});
-            }
+            referee.train();
             return referee;
         } else if (fan instanceof Footballer) {
-            if (fan.getStamina()[0] < 10) {
-                fan.setMoney(fan.getMoney() - 100);
-                fan.setStamina(new int[]{10, 5});
+            if (fan.isBlueTeam()) {
+                System.out.println("Your team is blue. Go to BlueTeamTrainingBase!");
+                return fan;
+            } else {
+                ((Footballer) fan).train();
+                return fan;
             }
-            return fan;
+
         } else if (fan instanceof Fan) {
             if (fan.isBlueTeam()) {
                 System.out.println("Your team is blue. Go to BlueTeamTrainingBase!");

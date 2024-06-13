@@ -62,7 +62,7 @@ public class FootballPitch extends Location {
         gc.fillOval(x - radius + 190, y - radius + 320, radius * 7, radius * 7);
         gc.setFont(new Font("Arial", 10));
         gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 40);
-        gc.fillText("Owners: " + microObjectsNames, x - radius + 20, y - radius + 20);
+        gc.fillText("Owners: " + counter, x - radius + 20, y - radius + 20);
 
 
         if (imageView == null) {
@@ -84,24 +84,15 @@ public class FootballPitch extends Location {
             }
         }
     }
-    /*
-фанати повинні стати футболістами, щоб грати
-футболісти і судді заробляють гроші
-суддя може вилучити гравця з поля на трибуну на певний час
-
-*/
     @Override
     public Fan interact(Fan fan) {
-        if (fan instanceof Referee) {
-            Referee referee = (Referee) fan;
-            referee.removeFromField(new Fan());
-            referee.setMoney(referee.getMoney()+1000);
-        } else if (fan instanceof Footballer) {
-            Footballer footballer = (Footballer) fan;
+        contains(0);
+        if (fan instanceof Referee referee) {
+            referee.work();
+        } else if (fan instanceof Footballer footballer) {
             footballer.play();
-            footballer.setMoney(footballer.getMoney()+5000);
-        } else if (fan instanceof Fan) {
-            //System.out.println("You must first be a footballer!");
+        } else if (fan != null) {
+            System.out.println("You must first be a footballer!");
         }
         return fan;
     }

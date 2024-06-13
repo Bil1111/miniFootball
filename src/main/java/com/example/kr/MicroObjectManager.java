@@ -10,10 +10,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.*;
 
 public class MicroObjectManager {
 
@@ -70,7 +67,7 @@ public class MicroObjectManager {
         TextField xPosField = new TextField();
         TextField yPosField = new TextField();
         RadioButton radioButton1 = new RadioButton("Fan");
-        RadioButton radioButton2 = new RadioButton("Player");
+        RadioButton radioButton2 = new RadioButton("Footballer");
         RadioButton radioButton3 = new RadioButton("Referee");
         setupTextInput(nameField);
         setupNumericInput(moneyField);
@@ -237,11 +234,13 @@ public class MicroObjectManager {
                         }
                     }
 
-                    // Print filtered fans
-                    System.out.println("Filtered Fans:");
-                    for (Fan fan : filteredFans) {
-                        System.out.println("MicroObject found:");
-                        System.out.println("Location: " + fan.getXPos() + ", " + fan.getYPos());
+                    if (!name.isEmpty() || !moneyField.getText().isEmpty() || isHasTicketCheckBox.isSelected() || isBlueTeamCheckBox.isSelected()) {
+                        // Print filtered fans
+                        System.out.println("Filtered Fans:");
+                        for (Fan fan : filteredFans) {
+                            System.out.println("MicroObject found:");
+                            System.out.println("Location: " + fan.getXPos() + ", " + fan.getYPos());
+                        }
                     }
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid input. Default preset");
@@ -250,40 +249,32 @@ public class MicroObjectManager {
 //ВИЗНАЧ ПРИНАЛЕЖНІСТЬ
             if (radioButton1.isSelected()) {
                 System.out.println("Micro objects in FootballPitch: ");
-                FootballPitch footballPitch = new FootballPitch("", 0, 0);
-                System.out.println(footballPitch.getMicroObjects());
+                belong(0);
             }
             if (radioButton2.isSelected()) {
                 System.out.println("Micro objects in BlueTeamTrainingBase: ");
-                BlueTeamTrainingBase blueTeamTrainingBase = new BlueTeamTrainingBase("", 0, 0);
-                System.out.println(blueTeamTrainingBase.getMicroObjects());
+                belong(1);
             }
             if (radioButton3.isSelected()) {
                 System.out.println("Micro objects in RedTeamTrainingBase: ");
-                RedTeamTrainingBase redTeamTrainingBase = new RedTeamTrainingBase("", 0, 0);
-                System.out.println(redTeamTrainingBase.getMicroObjects());
+                belong(2);
             }
             if (radioButton4.isSelected()) {
                 System.out.println("Micro objects in FootballRefereeSchool: ");
-                FootballRefereeSchool footballRefereeSchool = new FootballRefereeSchool("", 0, 0);
-                System.out.println(footballRefereeSchool.getMicroObjects());
+                belong(3);
             }
             if (radioButton5.isSelected()) {
                 System.out.println("Micro objects in CashRegister: ");
-                CashRegister cashRegister = new CashRegister("", 0, 0);
-                System.out.println(cashRegister.getMicroObjects());
+                belong(4);
             }
             if (radioButton6.isSelected()) {
                 System.out.println("Micro objects in FanTribune: ");
-                FanTribune fanTribune = new FanTribune("", 0, 0);
-                System.out.println(fanTribune.getMicroObjects());
+                belong(5);
             }
-            //ПРОРОБИ
-//            if (radioButton7.isSelected()) {
-//                System.out.println("Micro objects that DoNotBelongToAnyMacroObject: ");
-//                FootballPitch footballPitch=new FootballPitch("", 0, 0);
-//                System.out.println(footballPitch.getMicroObjects());
-//            }
+            if (radioButton7.isSelected()) {
+                System.out.println("Micro objects that DoNotBelongToAnyMacroObject: ");
+                checkUnassignedFans();
+            }
             if (radioButton8.isSelected()) {
                 System.out.println("Sort by name: ");
                 MicroObjectManager.getInstance().getFans().sort(new Comparator<Fan>() {
@@ -350,6 +341,7 @@ public class MicroObjectManager {
                         count++;
                     }
                 }
+
                 System.out.println(count);
             }
             return new Fan();
@@ -360,6 +352,33 @@ public class MicroObjectManager {
         result.ifPresent(microObject -> System.out.println("Created"));
     }
 
+    public void belong(int index){
+        for(Fan fan: fans){
+            if(((fan.getXPos() >= MacroObjectManager.getMacroObjects().get(index).getxPos() && fan.getXPos() <= MacroObjectManager.getMacroObjects().get(index).getxPos() + MacroObjectManager.getMacroObjects().get(index).getWidth() ||
+                    fan.getXPos() + fan.getWidth() >= MacroObjectManager.getMacroObjects().get(index).getxPos() && fan.getXPos() <= MacroObjectManager.getMacroObjects().get(index).getxPos() + MacroObjectManager.getMacroObjects().get(index).getWidth()) &&
+                    (fan.getYPos() >= MacroObjectManager.getMacroObjects().get(index).getyPos() && fan.getYPos() <= MacroObjectManager.getMacroObjects().get(index).getyPos() + MacroObjectManager.getMacroObjects().get(index).getHeight() ||
+                            fan.getYPos() + fan.getHeight() >= MacroObjectManager.getMacroObjects().get(index).getyPos() && fan.getYPos() <= MacroObjectManager.getMacroObjects().get(index).getyPos() + MacroObjectManager.getMacroObjects().get(index).getHeight()))){
+                System.out.println(fan);
+            }
+        }
+    }
+    public void checkUnassignedFans() {
+        for (Fan fan : fans) {
+            boolean belongs = false;
+            for (Location location : MacroObjectManager.getMacroObjects()) {
+                if (((fan.getXPos() >= location.getxPos() && fan.getXPos() <= location.getxPos() + location.getWidth() ||
+                        fan.getXPos() + fan.getWidth() >= location.getxPos() && fan.getXPos() <= location.getxPos() + location.getWidth()) &&
+                        (fan.getYPos() >= location.getyPos() && fan.getYPos() <= location.getyPos() + location.getHeight() ||
+                                fan.getYPos() + fan.getHeight() >= location.getyPos() && fan.getYPos() <= location.getyPos() + location.getHeight()))) {
+                    belongs = true;
+                    break;
+                }
+            }
+            if (!belongs) {
+                System.out.println(fan);
+            }
+        }
+    }
     public void deactivateAllMicroObjects() {
         for (Fan fan : fans) {
             if (fan.isActive()) {
@@ -440,8 +459,58 @@ public class MicroObjectManager {
         }
     }
 
-    public void method() {
-        //Взаємодія по клавіші
+//    public void interactionBetweenMicroAndMacro() {
+//        //Взаємодія по клавіші
+//        for (int i = 0; i < fans.size(); i++) {
+//            Fan fan = fans.get(i);
+//            for (Location location : MacroObjectManager.getInstance().getMacroObjects()) {
+//                if ((fan.getXPos() >= location.getxPos() && fan.getXPos() <= location.getxPos() + location.getWidth() ||
+//                        fan.getXPos() + fan.getWidth() >= location.getxPos() && fan.getXPos() <= location.getxPos() + location.getWidth()) &&
+//                        (fan.getYPos() >= location.getyPos() && fan.getYPos() <= location.getyPos() + location.getHeight() ||
+//                                fan.getYPos() + fan.getHeight() >= location.getyPos() && fan.getYPos() <= location.getyPos() + location.getHeight())
+//                ) {
+//                    Fan updatedFan = location.interact(fan);
+//                    location.microObjects.add(fan);
+//                    location.microObjectsNames.add(fan.getName());
+//                    if (updatedFan != fan) {
+//                        fans.set(i, updatedFan);
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+//    public void changeMovement() {
+//        for (Fan fan : fans) {
+//            if (fan instanceof Referee referee) {
+//                referee.setPreviousFootballPitch(false);
+//                referee.setPreviousFanTribune(true);
+//                referee.setPreviousBlueTeamTrainingBase(false);
+//                referee.setPreviousRedTeamTrainingBase(false);
+//                // referee.moveTo(MacroObjectManager.X_POS_FOOTBALL_REFEREE_SCHOOL, MacroObjectManager.Y_POS_FOOTBALL_REFEREE_SCHOOL);
+//            } else if (fan instanceof Footballer footballer) {
+//                //footballer.moveTo(MacroObjectManager.X_POS_FOOTBALL_PITCH, MacroObjectManager.Y_POS_FOOTBALL_PITCH);
+//                footballer.setPreviousFootballPitch(false);
+//                footballer.setPreviousFanTribune(false);
+//                if (footballer.isBlueTeam()) {
+//                    footballer.setPreviousBlueTeamTrainingBase(true);
+//                } else {
+//                    footballer.setPreviousRedTeamTrainingBase(true);
+//                }
+//            } else {
+//                fan.setPreviousCashRegister(false);
+//                fan.setPreviousFanTribune(false);
+//                if (fan.isBlueTeam()) {
+//                    fan.setPreviousBlueTeamTrainingBase(true);
+//                } else {
+//                    fan.setPreviousRedTeamTrainingBase(true);
+//                    //fan.moveTo(MacroObjectManager.X_POS_FAN_TRIBUNE, MacroObjectManager.Y_POS_FAN_TRIBUNE);
+//                }
+//            }
+//        }
+//    }
+
+    public void interactionBetweenMicroAndMacro() {
         for (int i = 0; i < fans.size(); i++) {
             Fan fan = fans.get(i);
             for (Location location : MacroObjectManager.getInstance().getMacroObjects()) {
@@ -460,6 +529,7 @@ public class MicroObjectManager {
             }
         }
     }
+
 
     public void updateAllMicroObjects() {
         //Взаємодія постійно
@@ -480,7 +550,24 @@ public class MicroObjectManager {
 //                }
 //            }
 //        }
-
+        for (Location location : MacroObjectManager.getMacroObjects()) {
+            for (Fan fan : getArray()) {
+                fan.walk(location);
+            }
+        }
+        for (Fan fan : getArray()) {
+            for (Fan otherFan : getArray()) {
+                if (fan != otherFan) {
+                    if (((fan.getXPos() >= otherFan.getXPos() && fan.getXPos() <= otherFan.getXPos() + otherFan.getWidth() ||
+                            fan.getXPos() + fan.getWidth() >= otherFan.getXPos() && fan.getXPos() <= otherFan.getXPos() + otherFan.getWidth()) &&
+                            (fan.getYPos() >= otherFan.getYPos() && fan.getYPos() <= otherFan.getYPos() + otherFan.getHeight() ||
+                                    fan.getYPos() + fan.getHeight() >= otherFan.getYPos() && fan.getYPos() <= otherFan.getYPos() + otherFan.getHeight()))) {
+                        fan.setInteract();
+                        otherFan.setInteract();
+                    }
+                }
+            }
+        }
     }
 
     public void changeActiveParam() {
@@ -510,6 +597,25 @@ public class MicroObjectManager {
                 }
             } else {
                 System.out.println("chose only 1 object!!!");
+            }
+        }
+    }
+
+    public Fan getFanHoldingPos(int x, int y) {
+        for (Fan fan : getArray()) {
+            if (x >= fan.getXPos() && x <= fan.getXPos() + fan.getWidth() &&
+                    y >= fan.getYPos() && y <= fan.getYPos() + fan.getHeight()) {
+                return fan;
+            }
+        }
+        return null;
+    }
+
+    public void moveSimpleFan(int x, int y, Fan fan) {
+        if (fan != null) {
+            if (fan.isActive()) {
+                fan.setXPos(x);
+                fan.setYPos(y);
             }
         }
     }

@@ -68,6 +68,7 @@ public class ParamController {
                if (fan instanceof Footballer) {
                     try {
                         Footballer footballer = (Footballer) fan;
+                        footballer.setXPos(Float.parseFloat(xPosInput.getText()));
                         footballer.setYPos(Float.parseFloat(yPosInput.getText()));
                         footballer.setMoney(Double.parseDouble(moneyInput.getText()));
                         footballer.setName(nameInput.getText());
@@ -84,6 +85,7 @@ public class ParamController {
                     }
                 } else if (fan instanceof Fan) {
                     try {
+                        fan.setXPos(Float.parseFloat(xPosInput.getText()));
                         fan.setYPos(Float.parseFloat(yPosInput.getText()));
                         fan.setMoney(Double.parseDouble(moneyInput.getText()));
                         fan.setName(nameInput.getText());

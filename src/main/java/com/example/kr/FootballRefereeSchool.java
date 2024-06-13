@@ -24,7 +24,7 @@ public class FootballRefereeSchool extends Location {
         }
         gc.fillOval(x - radius + 190, y - radius + 400, radius * 7, radius * 7);
         gc.fillText("Name: " + getName(), x - radius + 20, y - radius + 30);
-        gc.fillText("Owners: " + microObjectsNames.toString(), x - radius + 20, y - radius + 10);
+        gc.fillText("Owners: " + counter, x - radius + 20, y - radius + 10);
         gc.drawImage(imageView.getImage(), x - radius + 20, y - radius + 30);
     }
 
@@ -44,8 +44,9 @@ public class FootballRefereeSchool extends Location {
 
     @Override
     public Fan interact(Fan fan) {
+        contains(3);
         if (fan instanceof Referee) {
-            System.out.println("You are a referee");
+            System.out.println("You are already a referee");
             return fan;
 
         } else if (fan instanceof Footballer) {

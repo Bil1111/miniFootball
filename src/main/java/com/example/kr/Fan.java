@@ -17,6 +17,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
     static {
         System.out.println("Static initializer 'Fan'");
     }
+
     private String name;
     private int age;
     private double money;
@@ -27,6 +28,17 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
     private int width;
     private int height;
     private boolean isActive = false;
+    private boolean complete = false;
+    private boolean isHolding = false;
+    private transient Location handler;
+    private boolean previousCashRegister;
+    private boolean previousFanTribune = true;
+    private boolean previousBlueTeamTrainingBase;
+    private boolean previousRedTeamTrainingBase;
+    private int randomGoalX = -1;
+    private int randomGoalY = -1;
+    private int tickExisted;
+    private final Random random;
     private int[] stamina = new int[2];
     private transient ImageView imageView;
     private transient ImageView imageIcon;
@@ -57,21 +69,152 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
         }
     }
 
-    public void walk() {
-//            float xChange = (random.nextFloat() - 0.5f) * 20; // Change in x position
-//            float yChange = (random.nextFloat() - 0.5f) * 20; // Change in y position
-//
-//            // Update positions
-//            this.xPos += xChange;
-//            this.yPos += yChange;
-//
-//            // Optionally, add boundary checks (assuming canvas width and height are 800x600)
-//            if (this.xPos < 0) this.xPos = 0;
-//            if (this.xPos > 800) this.xPos = 800;
-//            if (this.yPos < 0) this.yPos = 0;
-//            if (this.yPos > 600) this.yPos = 600;
 
-        System.out.println("I'm walking");
+    public void walk(Location object) {
+        checkCollision(object);
+        if (!isActive) {
+            if (complete) {
+                if (randomGoalX == -1 && randomGoalY == -1) {
+                    randomGoalX = random.nextInt(100, 1200);
+                    randomGoalY = random.nextInt(100, 1200);
+                } else {
+                    if (Math.abs(xPos - randomGoalX) < 30 && Math.abs(yPos - randomGoalY) < 30) {
+                        randomGoalX = -1;
+                        randomGoalY = -1;
+                        complete = false;
+                        isHolding = false;
+                    } else {
+                        moveTo(randomGoalX, randomGoalY);
+                    }
+                }
+            } else {
+                if (!isHolding) {
+                    if (previousFanTribune && !previousBlueTeamTrainingBase && !previousRedTeamTrainingBase) {
+                        moveTo(MacroObjectManager.X_POS_CASH_REGISTER, MacroObjectManager.Y_POS_CASH_REGISTER);
+                    } else if (previousCashRegister && this.isBlueTeam) {
+                        moveTo(MacroObjectManager.X_POS_BLUE_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_BLUE_TEAM_TRAINING_BASE);
+                    } else if (previousCashRegister && !this.isBlueTeam) {
+                        moveTo(MacroObjectManager.X_POS_RED_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_RED_TEAM_TRAINING_BASE);
+                    } else if (previousBlueTeamTrainingBase || previousRedTeamTrainingBase) {
+                        moveTo(MacroObjectManager.X_POS_FAN_TRIBUNE, MacroObjectManager.Y_POS_FAN_TRIBUNE);
+                    }
+                }
+            }
+        }
+    }
+
+
+    protected void checkCollision(Location location) {
+        if (((xPos >= location.xPos && xPos <= location.xPos + location.getWidth() ||
+                xPos + width >= location.xPos && xPos <= location.xPos + location.getWidth()) &&
+                (yPos >= location.yPos && yPos <= location.yPos + location.getHeight() ||
+                        yPos + height >= location.yPos && yPos <= location.yPos + location.getHeight()))) {
+
+            if (handler != null) {
+               // handler.addNewMicroObject(this);
+            }
+            handler = location;
+
+            if (tickExisted != 200) {
+                tickExisted++;
+            } else {
+                complete = true;
+                tickExisted = 0;
+            }
+
+            if (this instanceof Fan) {
+                switch (location) {
+                    case BlueTeamTrainingBase blueTeamTrainingBase -> {
+                        if (previousCashRegister) {
+                            tickExisted = 0;
+                            complete = false;
+                            isHolding = true;
+                        }
+                       // location.addNewMicroObject(this);
+                        location.interact(this);
+                        previousCashRegister = false;
+                        previousFanTribune = false;
+                        previousRedTeamTrainingBase = false;
+                        previousBlueTeamTrainingBase = true;
+                    }
+                    case RedTeamTrainingBase redTeamTrainingBase -> {
+                        if (previousCashRegister) {
+                            tickExisted = 0;
+                            complete = false;
+                            isHolding = true;
+                        }
+                       // location.addNewMicroObject(this);
+                        location.interact(this);
+                        previousCashRegister = false;
+                        previousFanTribune = false;
+                        previousRedTeamTrainingBase = true;
+                        previousBlueTeamTrainingBase = false;
+                    }
+                    case CashRegister cashRegister -> {
+                        if (previousFanTribune) {
+                            tickExisted = 0;
+                            complete = false;
+                            isHolding = true;
+                        }
+
+                      //  location.addNewMicroObject(this);
+                        location.interact(this);
+                        previousCashRegister = true;
+                        previousFanTribune = false;
+                        previousRedTeamTrainingBase = false;
+                        previousBlueTeamTrainingBase = false;
+                    }
+                    case FanTribune fanTribune -> {
+                        if (previousBlueTeamTrainingBase) {
+                            tickExisted = 0;
+                            complete = false;
+                            isHolding = true;
+                            previousCashRegister = false;
+                            previousFanTribune = true;
+                            previousRedTeamTrainingBase = false;
+                            previousBlueTeamTrainingBase = false;
+                          //  location.addNewMicroObject(this);
+                            location.interact(this);
+
+
+                        }
+                        if (previousRedTeamTrainingBase) {
+                            tickExisted = 0;
+                            complete = false;
+                            isHolding = true;
+                         //   location.addNewMicroObject(this);
+                            location.interact(this);
+                            previousCashRegister = false;
+                            previousFanTribune = true;
+                            previousRedTeamTrainingBase = false;
+                            previousBlueTeamTrainingBase = false;
+                        }
+                    }
+                    default -> {
+                    }
+                }
+            }
+        } else {
+            if (handler != null) {
+               // handler.removeNewMicroObject(this);
+                handler = null;
+            }
+        }
+    }
+
+    public void moveTo(int x, int y) {
+        int currentX = (int) getXPos();
+        int currentY = (int) getYPos();
+        int dx = x - currentX;
+        int dy = y - currentY;
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        double normDx = (distance > 10) ? dx / distance : 10;
+        double normDy = (distance > 10) ? dy / distance : 10;
+        int moveDistance = 2;
+        int newX = (int) (currentX + moveDistance * normDx);
+        int newY = (int) (currentY + moveDistance * normDy);
+        setXPos(newX);
+        setYPos(newY);
     }
 
     public void cheer() {
@@ -81,21 +224,18 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
                 this.setStamina(new int[]{this.getStamina()[0] + 1, 5});
             }
         }
-        System.out.println(this + " is cheering");
     }
 
     public void earnMoney() {
-        System.out.println("Go to cash register and earn!");
+        this.setMoney(this.getMoney()+50);
     }
 
-    public void interact(Fan fan) {
-        System.out.println(this + " interacts with " + fan);
-    }
-
-    public void interact(Fan fan1, Fan fan2) {
-        System.out.println(this + " interacts with " + fan1 + " and " + fan2);
+    public void setInteract(Location location) {
+        location.interact(this);
     } // Статичний поліморфізм (Compile-time Polymorphism)
-
+    public void setInteract() {
+        this.setMoney(100000);
+    }
     public void setAccessory(Integer number, String accessory) {
         accessories.put(number, accessory);
     }
@@ -110,15 +250,14 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
         this.yPos = yPos;
         stamina[0] = 10;
         stamina[1] = 10;
+        random = new Random();
         this.uniqueID = createID();
-        System.out.println("Constructor Fan(String name, double money, boolean hasTicket, float xPos, float yPos) was called. An object was created with parameters: " + toString());
-        System.out.println();
+        //System.out.println("Constructor Fan(String name, double money, boolean hasTicket, float xPos, float yPos) was called. An object was created with parameters: " + toString());
     }
 
     public Fan() {
         this("Ivan", 50, false, false, 100, 100);
-        System.out.println("Constructor Fan() was called. An object was created with parameters: " + toString());
-        System.out.println();
+        //System.out.println("Constructor Fan() was called. An object was created with parameters: " + toString());
     }
 
     //SET and GET
@@ -214,6 +353,85 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
         return isActive;
     }
 
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public void setComplete(boolean complete) {
+        this.complete = complete;
+    }
+
+    public boolean isHolding() {
+        return isHolding;
+    }
+
+    public void setHolding(boolean holding) {
+        isHolding = holding;
+    }
+
+    public Location getHandler() {
+        return handler;
+    }
+
+    public void setHandler(Location handler) {
+        this.handler = handler;
+    }
+
+    public boolean isPreviousBlueTeamTrainingBase() {
+        return previousBlueTeamTrainingBase;
+    }
+
+    public boolean isPreviousRedTeamTrainingBase() {
+        return previousRedTeamTrainingBase;
+    }
+
+    public void setPreviousBlueTeamTrainingBase(boolean previousBlueTeamTrainingBase) {
+        this.previousBlueTeamTrainingBase = previousBlueTeamTrainingBase;
+    }
+
+    public void setPreviousRedTeamTrainingBase(boolean previousRedTeamTrainingBase) {
+        this.previousRedTeamTrainingBase = previousRedTeamTrainingBase;
+    }
+
+    public boolean isPreviousFanTribune() {
+        return previousFanTribune;
+    }
+
+    public void setPreviousFanTribune(boolean previousFanTribune) {
+        this.previousFanTribune = previousFanTribune;
+    }
+
+    public void setPreviousCashRegister(boolean previousCashRegister) {
+        this.previousCashRegister = previousCashRegister;
+    }
+
+    public int getRandomGoalX() {
+        return randomGoalX;
+    }
+
+    public void setRandomGoalX(int randomGoalX) {
+        this.randomGoalX = randomGoalX;
+    }
+
+    public void setRandomGoalY(int randomGoalY) {
+        this.randomGoalY = randomGoalY;
+    }
+
+    public int getRandomGoalY() {
+        return randomGoalY;
+    }
+
+    public int getTickExisted() {
+        return tickExisted;
+    }
+
+    public void setTickExisted(int tickExisted) {
+        this.tickExisted = tickExisted;
+    }
+
+    public Random getRandom() {
+        return random;
+    }
 
     protected ImageView getImageIcon() {
         return imageIcon;
@@ -257,7 +475,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
         tmp.accessories = new HashMap<>();
         tmp.accessories.putAll(this.accessories);
         tmp.setMoney(this.getMoney());
-        tmp.setXPos(this.xPos+90);
+        tmp.setXPos(this.xPos + 90);
         tmp.setYPos(this.yPos);
         tmp.setName(this.name);
         tmp.setAge(this.age);
@@ -291,6 +509,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
     public int compareTo(Fan o) {
         return Double.compare(this.getStamina()[1], o.getStamina()[1]);
     }
+
 
     public static class FanComparator implements Comparator<Fan> {
         @Override

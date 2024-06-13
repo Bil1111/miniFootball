@@ -7,6 +7,19 @@ public class MacroObjectManager {
     private static MacroObjectManager instance;
     private static final ArrayList<Location> macroObjects = new ArrayList<>();
 
+    public static final int X_POS_CASH_REGISTER = 450;
+    public static final int Y_POS_CASH_REGISTER = 130;
+    public static final int X_POS_FAN_TRIBUNE = 1850;
+    public static final int Y_POS_FAN_TRIBUNE = 130;
+    public static final int X_POS_BLUE_TEAM_TRAINING_BASE = 2300;
+    public static final int Y_POS_BLUE_TEAM_TRAINING_BASE = 900;
+    public static final int X_POS_RED_TEAM_TRAINING_BASE = 150;
+    public static final int Y_POS_RED_TEAM_TRAINING_BASE = 900;
+    public static final int X_POS_FOOTBALL_PITCH = 1350;
+    public static final int Y_POS_FOOTBALL_PITCH = 700;
+    public static final int X_POS_FOOTBALL_REFEREE_SCHOOL = 1350;
+    public static final int Y_POS_FOOTBALL_REFEREE_SCHOOL = 1700;
+
     public static ArrayList<Location> getMacroObjects() {
         return macroObjects;
     }
