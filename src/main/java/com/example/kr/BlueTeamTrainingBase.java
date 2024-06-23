@@ -42,11 +42,6 @@ public class BlueTeamTrainingBase extends Location {
         }
     }
 
-    /*
-    витрачають гроші і відновлюються швидше, ніж на трибунах
-    розділення по командах
-    фанати за певну суму стають гравцями
-    */
     @Override
     public Fan interact(Fan fan) {
         contains(1);

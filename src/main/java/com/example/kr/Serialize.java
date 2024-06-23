@@ -10,7 +10,6 @@ public class Serialize {
     public static void saveGame(ArrayList<Location> macroObjects, ArrayList<Fan> fans, String locationFilename, String fansFolder) {
         saveMacroObjects(macroObjects, locationFilename);
         saveFans(fans, fansFolder);
-        System.out.println("Game saved!");
     }
 
     public static void saveMacroObjects(ArrayList<Location> macroObjects, String filename) {
@@ -18,8 +17,8 @@ public class Serialize {
              ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
             out.writeObject(macroObjects);
             System.out.println("MacroObjects data is saved in " + filename);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
+
         }
     }
 
@@ -28,7 +27,6 @@ public class Serialize {
             String filename = fansFolder + File.separator + fan.getName() + new Random().nextInt(1,100000) + ".ser";
             saveObject(fan, filename);
         }
-        System.out.println("Fans saved!");
     }
 
     public static ArrayList<Location> loadGame(String locationFilename, String fansFolder) {
@@ -61,7 +59,6 @@ public class Serialize {
              ObjectInputStream in = new ObjectInputStream(fileIn)) {
             return (ArrayList<Location>) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -73,7 +70,6 @@ public class Serialize {
             System.out.println("Object data is loaded from " + file.getName());
             return object;
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -89,11 +85,10 @@ public class Serialize {
              ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
             out.writeObject(object);
             System.out.println("Object data is saved in " + filename);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
+
         }
     }
-
     public static void saveFan(Fan fan, String filename) {
         saveObject(fan, filename);
     }

@@ -13,8 +13,14 @@ import java.net.URL;
 import java.util.*;
 
 public class Location implements Serializable {
+    protected int counter;
+    {
+        counter=0;
+    }
+    @Serial
+    private static final long serialVersionUID = 1L;
     protected String name;
-    protected int counter=0;
+
     protected static ArrayList<Fan> microObjects = new ArrayList<>();
     private Set<Integer> countedFans = new HashSet<>();
     protected List<String> microObjectsNames = new ArrayList<>();
@@ -40,15 +46,6 @@ public class Location implements Serializable {
         this.yPos = yPos;
     }
 
-    public ImageView getImageView() {
-        return imageView;
-    }
-
-    public void setImageView(ImageView imageView) {
-        this.imageView = imageView;
-    }
-
-
     @Serial
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
@@ -69,30 +66,31 @@ public class Location implements Serializable {
         }
     }
 
-    protected void addNewMicroObject(Object object) {
-        if (object instanceof Fan) {
-            if (microObjects.stream().anyMatch(fan -> fan.getUniqueID() == ((Fan) object).getUniqueID())) {
+//    protected void addNewMicroObject(Object object) {
+//        if (object instanceof Fan) {
+//            if (microObjects.stream().anyMatch(fan -> fan.getUniqueID() == ((Fan) object).getUniqueID())) {
+//
+//                return;
+//            }
+    // counter++;
+//            microObjectsNames.add(((Fan) object).getName());
+//            microObjects.add((Fan) object);
+//        }
+//    }
+//    protected void removeNewMicroObject(Object object) {
+//        if (object instanceof Fan) {
+//            if(microObjects.contains((Fan)object)) {
+//                microObjects.remove(object);
+//             //   counter--;
+//            }
+//            int indexToRemove = microObjectsNames.indexOf(((Fan) object).getName());
+//            if (indexToRemove != -1) {
+//                microObjectsNames.remove(indexToRemove);
+//            }
+//        }
+//    }
 
-                return;
-            }
-           // counter++;
-            microObjectsNames.add(((Fan) object).getName());
-            microObjects.add((Fan) object);
-        }
-    }
 
-    protected void removeNewMicroObject(Object object) {
-        if (object instanceof Fan) {
-            if(microObjects.contains((Fan)object)) {
-                microObjects.remove(object);
-             //   counter--;
-            }
-            int indexToRemove = microObjectsNames.indexOf(((Fan) object).getName());
-            if (indexToRemove != -1) {
-                microObjectsNames.remove(indexToRemove);
-            }
-        }
-    }
     public Location(String name, float x, float y) {
         this.name = name;
         this.xPos = x;

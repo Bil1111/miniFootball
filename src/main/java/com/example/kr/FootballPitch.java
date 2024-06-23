@@ -10,47 +10,11 @@ import java.util.ArrayList;
 
 public class FootballPitch extends Location {
 
-//
-//    protected String name;
-//    protected ArrayList<Fan> microObjects;
-//    protected ArrayList<String> microObjectsNames;
-//    protected int height;
-//    protected int width;
-//    protected float xPos;
-//    protected float yPos;
-//    protected ImageView imageView;
-//    protected void addNewMicroObject(Object object) {
-//        if (object instanceof Knight) {
-//            microObjectsNames.add(((Knight) object).getName());
-//            microObjects.add((Knight) object);
-//        }
-//    }
 
     public FootballPitch(String name, float x, float y) {
         super(name, x, y);
     }
 
-    //    public String getName() {
-//        return name;
-//    }
-//    public void setName(String name) {
-//        this.name = name;
-//    }
-//
-//    public int getHeight() {
-//        return height;
-//    }
-//    public void setHeight(int height) {
-//        this.height = height;
-//    }
-//
-////    public int getWidth() {
-////        return width;
-////    }
-//
-//    public void setWidth(int width) {
-//        this.width = width;
-//    }
     @Override
     public void draw(GraphicsContext gc) {
         float x = this.xPos;

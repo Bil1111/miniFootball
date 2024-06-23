@@ -19,6 +19,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -61,7 +62,6 @@ public class Main extends Application {
         canvas = new Canvas(mainAnchorPane.getWidth(), mainAnchorPane.getHeight());
         miniMap = new Canvas(200, 200);
         Rectangle miniMapBorder = new Rectangle(210, 210, Color.TRANSPARENT);
-        // miniMapBorder.setStroke(Paint.valueOf("/com/example/kr/MiniMapBorder1.png"));
         miniMapBorder.setStroke(Color.BLACK);
         mainAnchorPane.getChildren().add(canvas);
         stackPane.getChildren().addAll(miniMapBorder, miniMap);
@@ -97,9 +97,9 @@ public class Main extends Application {
                 case X:
                     microObjectManager.interactionBetweenMicroAndMacro();//взаємодія мікро з макро
                     break;
-//                case V:
-//                    microObjectManager.changeMovement();
-//                    break;
+                case V:
+                    microObjectManager.changeMovement();
+                    break;
                 case C:
                     List<Fan> fansToAdd = new ArrayList<>();
                     for (Fan fan : MicroObjectManager.getInstance().getFans()) {
@@ -115,39 +115,10 @@ public class Main extends Application {
                     MicroObjectManager.getInstance().getFans().addAll(fansToAdd);
                     break;
                 case E:
-                    Serialize.saveGame(MacroObjectManager.getMacroObjects(), microObjectManager.getArray(), "location.ser", "fans");
-                    File fansFolder = new File("fans");
-                    if (fansFolder.exists() && fansFolder.isDirectory()) {
-                        for (File file : Objects.requireNonNull(fansFolder.listFiles())) {
-                            if (file.isFile() && file.getName().endsWith(".ser")) file.delete();
-                        }
-                    }
-
-                    for (Fan fan : microObjectManager.getFans()) {
-                        Serialize.saveFan(fan, "fans/" + fan.getUniqueID() + ".ser");
-                    }
+                    saveInFile(primaryStage);
                     break;
                 case L:
-                    ArrayList<Location> loadedLocation = Serialize.loadGame("location.ser", "fans");
-                    if (loadedLocation != null) {
-                        System.out.println("Location named '" + loadedLocation.getFirst().getName() + "' has been loaded.");
-                        MacroObjectManager.getMacroObjects().clear();
-                        MacroObjectManager.getMacroObjects().addAll(loadedLocation);
-                        microObjectManager.clearAllMicroObjects();
-                        fansFolder = new File("fans");
-                        if (fansFolder.exists() && fansFolder.isDirectory()) {
-                            for (File file : Objects.requireNonNull(fansFolder.listFiles())) {
-                                if (file.isFile() && file.getName().endsWith(".ser")) {
-                                    Fan loadedFan = (Fan) Serialize.loadObject(file);
-                                    if (loadedFan != null) {
-                                        microObjectManager.addNewMicroObject(loadedFan);
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        System.out.println("Failed to load the location from the selected file.");
-                    }
+                    loadFromFile(primaryStage);
                     break;
 
             }
@@ -234,6 +205,62 @@ public class Main extends Application {
         miniMapGc.setStroke(Color.RED);
         miniMapGc.strokeRect(viewportX, viewportY, viewportWidth, viewportHeight);
     }
+    private void saveInFile(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save fame in file!");
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            saveGame(file.getAbsolutePath());
+        }
+    }
+
+    private void loadFromFile(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Load game from file!");
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            loadGame(file.getAbsolutePath());
+        }
+    }
+
+    private void saveGame(String filePath) {
+        Serialize.saveGame(MacroObjectManager.getMacroObjects(), microObjectManager.getFans(), filePath, "fans");
+        File fansFolder = new File("fans");
+        if (fansFolder.exists()) {
+            for (File file : Objects.requireNonNull(fansFolder.listFiles())) {
+                if (file.isFile() && file.getName().endsWith(".ser")) {
+                    file.delete();
+                }
+            }
+        }
+        for (Fan fan : microObjectManager.getFans()) {
+            Serialize.saveFan(fan, "fans/" + fan.getUniqueID() + ".ser");
+        }
+    }
+
+    private void loadGame(String filePath) {
+        ArrayList<Location> loadedLocation = Serialize.loadGame(filePath, "fans");
+        if (loadedLocation != null) {
+            System.out.println("Location '" + loadedLocation.getFirst().getName() + "' loaded successfully.");
+            MacroObjectManager.getMacroObjects().clear();
+            MacroObjectManager.getMacroObjects().addAll(loadedLocation);
+            microObjectManager.clearAllMicroObjects();
+            File fansFolder = new File("fans");
+            if (fansFolder.exists()) {
+                for (File file : Objects.requireNonNull(fansFolder.listFiles())) {
+                    if (file.isFile() && file.getName().endsWith(".ser")) {
+                        Fan loadedFan = (Fan) Serialize.loadObject(file);
+                        if (loadedFan != null) {
+                            microObjectManager.addNewMicroObject(loadedFan);
+                        }
+                    }
+                }
+            }
+        } else {
+            System.out.println("Failed to load location.");
+        }
+    }
+
     private void addPressAndHoldHandler(Node node, EventHandler<MouseEvent> handler) {
         class Wrapper<T> { T content; }
         Wrapper<MouseEvent> eventWrapper = new Wrapper<>();

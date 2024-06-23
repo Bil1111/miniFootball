@@ -54,6 +54,7 @@ public class CashRegister extends Location{
             footballer.earnMoney();
         } else if (fan instanceof Fan) {
             fan.earnMoney();
+            fan.buyTicket();
         }
 
         return fan;

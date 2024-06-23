@@ -38,7 +38,7 @@ public class Referee extends Footballer {
     public void recovery() {
         if (this.getStamina()[0] < 10) {
             this.setStamina(new int[]{this.getStamina()[0] + 2, 5});
-            if(this.getStamina()[0] > 10){
+            if (this.getStamina()[0] > 10) {
                 this.setStamina(new int[]{10, 5});
             }
         }
@@ -55,7 +55,7 @@ public class Referee extends Footballer {
     //Динамічний поліморфізм (Run-time Polymorphism)
     @Override
     public void earnMoney() {
-        this.setMoney(this.getMoney()+10);
+        this.setMoney(this.getMoney() + 10);
     }
 
     @Override
@@ -118,15 +118,14 @@ public class Referee extends Footballer {
                 }
             } else {
                 if (!isHolding()) {
-                    if (!isPreviousFootballPitch() && isPreviousFanTribune() && this.isBlueTeam()) {
-                        moveTo(MacroObjectManager.X_POS_BLUE_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_BLUE_TEAM_TRAINING_BASE);
-                    } else if (!isPreviousFootballPitch() && isPreviousFanTribune() && !this.isBlueTeam()) {
-                        moveTo(MacroObjectManager.X_POS_RED_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_RED_TEAM_TRAINING_BASE);
-                    } else if (isPreviousBlueTeamTrainingBase()||isPreviousRedTeamTrainingBase()) {
+                    if (!previousFootballRefereeSchool && (isPreviousBlueTeamTrainingBase() || isPreviousRedTeamTrainingBase())) {
                         moveTo(MacroObjectManager.X_POS_FOOTBALL_PITCH, MacroObjectManager.Y_POS_FOOTBALL_PITCH);
-                    }
-                    else if (isPreviousFootballPitch()) {
-                        moveTo(MacroObjectManager.X_POS_FAN_TRIBUNE, MacroObjectManager.Y_POS_FAN_TRIBUNE);
+                    } else if (isPreviousFootballPitch()) {
+                        moveTo(MacroObjectManager.X_POS_FOOTBALL_REFEREE_SCHOOL, MacroObjectManager.Y_POS_FOOTBALL_REFEREE_SCHOOL);
+                    } else if (isPreviousFootballRefereeSchool() && this.isBlueTeam()) {
+                        moveTo(MacroObjectManager.X_POS_BLUE_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_BLUE_TEAM_TRAINING_BASE);
+                    } else if (isPreviousFootballRefereeSchool() && !this.isBlueTeam()) {
+                        moveTo(MacroObjectManager.X_POS_RED_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_RED_TEAM_TRAINING_BASE);
                     }
                 }
             }
@@ -141,7 +140,7 @@ public class Referee extends Footballer {
                         getYPos() + getHeight() >= location.yPos && getYPos() <= location.yPos + location.getHeight()))) {
 
             if (getHandler() != null) {
-                //getHandler().addNewMicroObject(this);
+                //  getHandler().addNewMicroObject(this);
             }
             setHandler(location);
 
@@ -152,70 +151,70 @@ public class Referee extends Footballer {
                 setTickExisted(0);
             }
 
-            if (this instanceof Referee) {
+            if (this instanceof Footballer) {
                 switch (location) {
+                    case FootballRefereeSchool footballRefereeSchool -> {
+                        if (isPreviousFootballPitch()) {
+                            setTickExisted(0);
+                            setComplete(false);
+                            setHolding(true);
+                            //location.addNewMicroObject(this);
+                            location.interact(this);
+                            setPreviousBlueTeamTrainingBase(false);
+                            setPreviousRedTeamTrainingBase(false);
+                            setPreviousFootballPitch(false);
+                            setPreviousFootballRefereeSchool(true);
+                        }
+                    }
                     case FootballPitch footballPitch -> {
                         if (isPreviousBlueTeamTrainingBase()) {
                             setTickExisted(0);
                             setComplete(false);
                             setHolding(true);
-                           // location.addNewMicroObject(this);
+                            //location.addNewMicroObject(this);
                             location.interact(this);
                             setPreviousBlueTeamTrainingBase(false);
                             setPreviousRedTeamTrainingBase(false);
                             setPreviousFootballPitch(true);
-                            setPreviousFanTribune(false);
+                            setPreviousFootballRefereeSchool(false);
                         }
                         if (isPreviousRedTeamTrainingBase()) {
                             setTickExisted(0);
                             setComplete(false);
                             setHolding(true);
-                          //  location.addNewMicroObject(this);
+                            //location.addNewMicroObject(this);
                             location.interact(this);
                             setPreviousBlueTeamTrainingBase(false);
                             setPreviousRedTeamTrainingBase(false);
                             setPreviousFootballPitch(true);
-                            setPreviousFanTribune(false);
+                            setPreviousFootballRefereeSchool(false);
                         }
                     }
                     case BlueTeamTrainingBase blueTeamTrainingBase -> {
-                        if (isPreviousFanTribune()) {
+                        if (isPreviousFootballRefereeSchool()) {
                             setTickExisted(0);
                             setComplete(false);
                             setHolding(true);
                         }
-                       // location.addNewMicroObject(this);
+                        //location.addNewMicroObject(this);
                         location.interact(this);
                         setPreviousBlueTeamTrainingBase(true);
                         setPreviousRedTeamTrainingBase(false);
                         setPreviousFootballPitch(false);
-                        setPreviousFanTribune(false);
+                        setPreviousFootballRefereeSchool(false);
                     }
                     case RedTeamTrainingBase redTeamTrainingBase -> {
-                        if (isPreviousFanTribune()) {
+                        if (isPreviousFootballRefereeSchool()) {
                             setTickExisted(0);
                             setComplete(false);
                             setHolding(true);
                         }
-                       // location.addNewMicroObject(this);
+                        //location.addNewMicroObject(this);
                         location.interact(this);
                         setPreviousBlueTeamTrainingBase(false);
                         setPreviousRedTeamTrainingBase(true);
                         setPreviousFootballPitch(false);
-                        setPreviousFanTribune(false);
-                    }
-                    case FanTribune fanTribune -> {
-                        if (isPreviousFootballPitch()) {
-                            setTickExisted(0);
-                            setComplete(false);
-                            setHolding(true);
-                        }
-                       // location.addNewMicroObject(this);
-                        location.interact(this);
-                        setPreviousBlueTeamTrainingBase(false);
-                        setPreviousRedTeamTrainingBase(false);
-                        setPreviousFootballPitch(false);
-                        setPreviousFanTribune(true);
+                        setPreviousFootballRefereeSchool(false);
                     }
                     default -> {
                     }
@@ -223,7 +222,7 @@ public class Referee extends Footballer {
             }
         } else {
             if (getHandler() != null) {
-               // getHandler().removeNewMicroObject(this);
+                //getHandler().removeNewMicroObject(this);
                 setHandler(null);
             }
         }

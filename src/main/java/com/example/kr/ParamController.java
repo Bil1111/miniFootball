@@ -65,7 +65,7 @@ public class ParamController {
     public void okButtonClicked() {
         for (Fan fan : MicroObjectManager.getInstance().getFans()) {
             if (fan.isActive()) {
-               if (fan instanceof Footballer) {
+                if (fan instanceof Footballer) {
                     try {
                         Footballer footballer = (Footballer) fan;
                         footballer.setXPos(Float.parseFloat(xPosInput.getText()));

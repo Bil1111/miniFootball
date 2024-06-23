@@ -10,6 +10,7 @@ import java.util.Objects;
 
 public class Footballer extends Fan {
     private boolean previousFootballPitch;
+    private boolean previousFootballRefereeSchool;
 
     public boolean isPreviousFootballPitch() {
         return previousFootballPitch;
@@ -19,14 +20,26 @@ public class Footballer extends Fan {
         this.previousFootballPitch = previousFootballPitch;
     }
 
+    public boolean isPreviousFootballRefereeSchool() {
+        return previousFootballRefereeSchool;
+    }
+
+    public void setPreviousFootballRefereeSchool(boolean previousFootballRefereeSchool) {
+        this.previousFootballRefereeSchool = previousFootballRefereeSchool;
+    }
+
     Footballer(String name, double money, boolean hasTicket, boolean isBlueTeam, float xPos, float yPos) {
         super(name, money, hasTicket, isBlueTeam, xPos, yPos);
-        setPreviousFanTribune(true);
+        if (this.isBlueTeam()) {
+            setPreviousBlueTeamTrainingBase(true);
+        } else {
+            setPreviousRedTeamTrainingBase(true);
+        }
     }
 
     public Footballer() {
         this("Ivan", 50, false, false, 100, 100);//null or ""
-       // System.out.println("Constructor Fan() was called. An object was created with parameters: " + toString());
+        // System.out.println("Constructor Fan() was called. An object was created with parameters: " + toString());
     }
 
     public void play() { //Footballer interacts with FootballPitch
@@ -55,7 +68,7 @@ public class Footballer extends Fan {
     //Динамічний поліморфізм (Run-time Polymorphism)
     @Override
     public void earnMoney() {
-        this.setMoney(this.getMoney()+25);
+        this.setMoney(this.getMoney() + 25);
     }
 
     @Override
@@ -124,15 +137,14 @@ public class Footballer extends Fan {
                 }
             } else {
                 if (!isHolding()) {
-                    if (!previousFootballPitch && isPreviousFanTribune() && this.isBlueTeam()) {
-                        moveTo(MacroObjectManager.X_POS_BLUE_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_BLUE_TEAM_TRAINING_BASE);
-                    } else if (!previousFootballPitch && isPreviousFanTribune() && !this.isBlueTeam()) {
-                        moveTo(MacroObjectManager.X_POS_RED_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_RED_TEAM_TRAINING_BASE);
-                    } else if (isPreviousBlueTeamTrainingBase()||isPreviousRedTeamTrainingBase()) {
+                    if (!previousFootballRefereeSchool && (isPreviousBlueTeamTrainingBase()||isPreviousRedTeamTrainingBase())) {
                         moveTo(MacroObjectManager.X_POS_FOOTBALL_PITCH, MacroObjectManager.Y_POS_FOOTBALL_PITCH);
-                    }
-                    else if (isPreviousFootballPitch()) {
-                        moveTo(MacroObjectManager.X_POS_FAN_TRIBUNE, MacroObjectManager.Y_POS_FAN_TRIBUNE);
+                    } else if (isPreviousFootballPitch()) {
+                        moveTo(MacroObjectManager.X_POS_FOOTBALL_REFEREE_SCHOOL, MacroObjectManager.Y_POS_FOOTBALL_REFEREE_SCHOOL);
+                    } else if (isPreviousFootballRefereeSchool()&&this.isBlueTeam()) {
+                        moveTo(MacroObjectManager.X_POS_BLUE_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_BLUE_TEAM_TRAINING_BASE);
+                    } else if (isPreviousFootballRefereeSchool()&&!this.isBlueTeam()) {
+                        moveTo(MacroObjectManager.X_POS_RED_TEAM_TRAINING_BASE, MacroObjectManager.Y_POS_RED_TEAM_TRAINING_BASE);
                     }
                 }
             }
@@ -147,7 +159,7 @@ public class Footballer extends Fan {
                         getYPos() + getHeight() >= location.yPos && getYPos() <= location.yPos + location.getHeight()))) {
 
             if (getHandler() != null) {
-              //  getHandler().addNewMicroObject(this);
+                //  getHandler().addNewMicroObject(this);
             }
             setHandler(location);
 
@@ -160,6 +172,19 @@ public class Footballer extends Fan {
 
             if (this instanceof Footballer) {
                 switch (location) {
+                    case FootballRefereeSchool footballRefereeSchool->{
+                        if (isPreviousFootballPitch()) {
+                            setTickExisted(0);
+                            setComplete(false);
+                            setHolding(true);
+                            //location.addNewMicroObject(this);
+                            location.interact(this);
+                            setPreviousBlueTeamTrainingBase(false);
+                            setPreviousRedTeamTrainingBase(false);
+                            previousFootballPitch = false;
+                            setPreviousFootballRefereeSchool(true);
+                        }
+                    }
                     case FootballPitch footballPitch -> {
                         if (isPreviousBlueTeamTrainingBase()) {
                             setTickExisted(0);
@@ -170,7 +195,7 @@ public class Footballer extends Fan {
                             setPreviousBlueTeamTrainingBase(false);
                             setPreviousRedTeamTrainingBase(false);
                             previousFootballPitch = true;
-                            setPreviousFanTribune(false);
+                            setPreviousFootballRefereeSchool(false);
                         }
                         if (isPreviousRedTeamTrainingBase()) {
                             setTickExisted(0);
@@ -181,11 +206,11 @@ public class Footballer extends Fan {
                             setPreviousBlueTeamTrainingBase(false);
                             setPreviousRedTeamTrainingBase(false);
                             previousFootballPitch = true;
-                            setPreviousFanTribune(false);
+                            setPreviousFootballRefereeSchool(false);
                         }
                     }
                     case BlueTeamTrainingBase blueTeamTrainingBase -> {
-                        if (isPreviousFanTribune()) {
+                        if (isPreviousFootballRefereeSchool()) {
                             setTickExisted(0);
                             setComplete(false);
                             setHolding(true);
@@ -195,10 +220,10 @@ public class Footballer extends Fan {
                         setPreviousBlueTeamTrainingBase(true);
                         setPreviousRedTeamTrainingBase(false);
                         previousFootballPitch = false;
-                        setPreviousFanTribune(false);
+                        setPreviousFootballRefereeSchool(false);
                     }
                     case RedTeamTrainingBase redTeamTrainingBase -> {
-                        if (isPreviousFanTribune()) {
+                        if (isPreviousFootballRefereeSchool()) {
                             setTickExisted(0);
                             setComplete(false);
                             setHolding(true);
@@ -208,20 +233,7 @@ public class Footballer extends Fan {
                         setPreviousBlueTeamTrainingBase(false);
                         setPreviousRedTeamTrainingBase(true);
                         previousFootballPitch = false;
-                        setPreviousFanTribune(false);
-                    }
-                    case FanTribune fanTribune -> {
-                        if (previousFootballPitch) {
-                            setTickExisted(0);
-                            setComplete(false);
-                            setHolding(true);
-                        }
-                        //location.addNewMicroObject(this);
-                        location.interact(this);
-                        setPreviousBlueTeamTrainingBase(false);
-                        setPreviousRedTeamTrainingBase(false);
-                        previousFootballPitch = false;
-                        setPreviousFanTribune(true);
+                        setPreviousFootballRefereeSchool(false);
                     }
                     default -> {
                     }

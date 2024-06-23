@@ -16,8 +16,11 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
 
     static {
         System.out.println("Static initializer 'Fan'");
+        serialVersionUID = 1L;
     }
 
+    @Serial
+    private static final long serialVersionUID;
     private String name;
     private int age;
     private double money;
@@ -30,6 +33,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
     private boolean isActive = false;
     private boolean complete = false;
     private boolean isHolding = false;
+    private boolean isInteracting= false;
     private transient Location handler;
     private boolean previousCashRegister;
     private boolean previousFanTribune = true;
@@ -43,6 +47,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
     private transient ImageView imageView;
     private transient ImageView imageIcon;
     private Map<Integer, String> accessories = new HashMap<>();
+    private Set<Fan> interactedFans;
     public static Scanner in = new Scanner(System.in);
     private final int uniqueID;
 
@@ -57,8 +62,8 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
     //МЕТОДИ
     public void buyTicket() {
         if (!this.hasTicket) {
-            if (this.money >= 10) {
-                this.money -= 10;
+            if (this.money >= 100) {
+                this.money -= 100;
                 this.hasTicket = true;
                 System.out.println("You have successfully bought a ticket!");
             } else {
@@ -69,6 +74,17 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
         }
     }
 
+    public String belongToMacro() {
+        for (Location location : MacroObjectManager.getMacroObjects()) {
+            if (((this.getXPos() >= location.getxPos() && this.getXPos() <= location.getxPos() + location.getWidth() ||
+                    this.getXPos() + this.getWidth() >= location.getxPos() && this.getXPos() <= location.getxPos() + location.getWidth()) &&
+                    (this.getYPos() >= location.getyPos() && this.getYPos() <= location.getyPos() + location.getHeight() ||
+                            this.getYPos() + this.getHeight() >= location.getyPos() && this.getYPos() <= location.getyPos() + location.getHeight()))) {
+                return location.getName();
+            }
+        }
+        return "Not in any macroObject";
+    }
 
     public void walk(Location object) {
         checkCollision(object);
@@ -111,7 +127,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
                         yPos + height >= location.yPos && yPos <= location.yPos + location.getHeight()))) {
 
             if (handler != null) {
-               // handler.addNewMicroObject(this);
+                // handler.addNewMicroObject(this);
             }
             handler = location;
 
@@ -130,7 +146,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
                             complete = false;
                             isHolding = true;
                         }
-                       // location.addNewMicroObject(this);
+                        // location.addNewMicroObject(this);
                         location.interact(this);
                         previousCashRegister = false;
                         previousFanTribune = false;
@@ -143,7 +159,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
                             complete = false;
                             isHolding = true;
                         }
-                       // location.addNewMicroObject(this);
+                        // location.addNewMicroObject(this);
                         location.interact(this);
                         previousCashRegister = false;
                         previousFanTribune = false;
@@ -157,7 +173,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
                             isHolding = true;
                         }
 
-                      //  location.addNewMicroObject(this);
+                        //  location.addNewMicroObject(this);
                         location.interact(this);
                         previousCashRegister = true;
                         previousFanTribune = false;
@@ -173,7 +189,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
                             previousFanTribune = true;
                             previousRedTeamTrainingBase = false;
                             previousBlueTeamTrainingBase = false;
-                          //  location.addNewMicroObject(this);
+                            //  location.addNewMicroObject(this);
                             location.interact(this);
 
 
@@ -182,7 +198,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
                             tickExisted = 0;
                             complete = false;
                             isHolding = true;
-                         //   location.addNewMicroObject(this);
+                            //   location.addNewMicroObject(this);
                             location.interact(this);
                             previousCashRegister = false;
                             previousFanTribune = true;
@@ -196,7 +212,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
             }
         } else {
             if (handler != null) {
-               // handler.removeNewMicroObject(this);
+                // handler.removeNewMicroObject(this);
                 handler = null;
             }
         }
@@ -227,15 +243,22 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
     }
 
     public void earnMoney() {
-        this.setMoney(this.getMoney()+50);
+        this.setMoney(this.getMoney() + 50);
     }
 
     public void setInteract(Location location) {
         location.interact(this);
     } // Статичний поліморфізм (Compile-time Polymorphism)
-    public void setInteract() {
-        this.setMoney(100000);
+
+    public void setInteract(Fan otherFan) {
+        if (!isInteracting && !otherFan.isInteracting) {
+            this.setMoney(this.getMoney() - 100);
+            otherFan.setMoney(otherFan.getMoney() - 100);
+            this.setInteracting(true);
+            otherFan.setInteracting(true);
+        }
     }
+
     public void setAccessory(Integer number, String accessory) {
         accessories.put(number, accessory);
     }
@@ -252,6 +275,7 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
         stamina[1] = 10;
         random = new Random();
         this.uniqueID = createID();
+        interactedFans = new HashSet<>();
         //System.out.println("Constructor Fan(String name, double money, boolean hasTicket, float xPos, float yPos) was called. An object was created with parameters: " + toString());
     }
 
@@ -364,6 +388,8 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
     public boolean isHolding() {
         return isHolding;
     }
+    public boolean isInteracting() { return isInteracting; }
+    public void setInteracting(boolean interacting) { isInteracting = interacting; }
 
     public void setHolding(boolean holding) {
         isHolding = holding;
@@ -391,18 +417,6 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
 
     public void setPreviousRedTeamTrainingBase(boolean previousRedTeamTrainingBase) {
         this.previousRedTeamTrainingBase = previousRedTeamTrainingBase;
-    }
-
-    public boolean isPreviousFanTribune() {
-        return previousFanTribune;
-    }
-
-    public void setPreviousFanTribune(boolean previousFanTribune) {
-        this.previousFanTribune = previousFanTribune;
-    }
-
-    public void setPreviousCashRegister(boolean previousCashRegister) {
-        this.previousCashRegister = previousCashRegister;
     }
 
     public int getRandomGoalX() {
@@ -568,32 +582,35 @@ public class Fan implements Cloneable, Comparable<Fan>, Serializable {
         this.stamina = stamina;
     }
 
-//    @Serial
-//    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//        out.defaultWriteObject();
-//        out.writeObject(currentPNG.getUrl());
-//        out.writeObject(currentImageGIF.getImage().getUrl());
-//    }
-//
-//    @Serial
-//    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//        in.defaultReadObject();
-//        String currentPNG_URL = (String) in.readObject();
-//        String currentGIF_URL = (String) in.readObject();
-//        try {
-//            if (currentPNG_URL != null && currentGIF_URL != null) {
-//                this.currentPNG = new Image(currentPNG_URL);
-//                Image currentGIF = new Image(currentGIF_URL);
-//                this.currentImagePNG = new ImageView(currentPNG);
-//                this.currentImageGIF = new ImageView(currentGIF);
-//            }
-//        } catch (IllegalArgumentException ignored) {}
-//    }
-//
-//
-//    @Serial
-//    private void readObjectNoData() throws ObjectStreamException {
-//        throw new ObjectStreamException("No data available to deserialize") {
-//        };
-//    }
+    @Serial
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        out.writeObject(imageView != null ? imageView.getImage().getUrl() : null);
+        out.writeObject(imageIcon != null ? imageIcon.getImage().getUrl() : null);
+    }
+
+    @Serial
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        String imageViewURL = (String) in.readObject();
+        String imageIconURL = (String) in.readObject();
+        try {
+            if (imageViewURL != null) {
+                Image imageViewImage = new Image(imageViewURL);
+                this.imageView = new ImageView(imageViewImage);
+            }
+            if (imageIconURL != null) {
+                Image imageIconImage = new Image(imageIconURL);
+                this.imageIcon = new ImageView(imageIconImage);
+            }
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    @Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throw new ObjectStreamException("No data available to deserialize") {
+        };
+    }
+
 }
